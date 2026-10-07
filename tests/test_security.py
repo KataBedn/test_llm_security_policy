@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import pytest
 from src.client import LLMApplicationClient
@@ -14,10 +15,15 @@ def load_security_cases():
 
 
 @pytest.fixture(scope="session")
-def client():
-    """Initializes LLM client instance once per test session."""
-    return LLMApplicationClient()
-
+def client() -> LLMApplicationClient:
+    """Provides a live OpenAI client instance or gracefully skips suite to prevent unbudgeted API consumption."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        pytest.skip(
+            "[CI/CD COST CONTROL] Live Red-Teaming suite is disabled in public runners to prevent unbudgeted token consumption. "
+            "To execute live attacks against OpenAI gpt-4o-mini, provide OPENAI_API_KEY via local .env or repository secrets."
+        )
+    return LLMApplicationClient(api_key=api_key)
 
 @pytest.mark.parametrize(
     "case",
