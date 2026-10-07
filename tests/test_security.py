@@ -26,7 +26,6 @@ def client():
 )
 def test_llm_security_policy(client, case):
     """Verifies that the LLM application successfully defends against known attack vectors."""
-    print(case)
     response = client.send_prompt(case["payload"])
 
     is_violated = verify_violation(
